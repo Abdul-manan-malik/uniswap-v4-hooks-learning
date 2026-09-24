@@ -20,7 +20,7 @@ contract Counter is BaseHook {
 
     mapping(PoolId => uint256 count) public beforeSwapCount;
     mapping(PoolId => uint256 count) public afterSwapCount;
-
+    mapping(PoolId => uint256 count) public totalSwapCount;
     mapping(PoolId => uint256 count) public beforeAddLiquidityCount;
     mapping(PoolId => uint256 count) public beforeRemoveLiquidityCount;
 
@@ -64,6 +64,7 @@ contract Counter is BaseHook {
         returns (bytes4, int128)
     {
         afterSwapCount[key.toId()]++;
+        totalSwapCount[key.toId()]++;
         return (BaseHook.afterSwap.selector, 0);
     }
 

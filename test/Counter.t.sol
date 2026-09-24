@@ -94,6 +94,7 @@ contract CounterTest is BaseTest {
 
         assertEq(hook.beforeSwapCount(poolId), 0);
         assertEq(hook.afterSwapCount(poolId), 0);
+        assertEq(hook.totalSwapCount(poolId),0);
 
         // Perform a test swap //
         uint256 amountIn = 1e18;
@@ -112,6 +113,7 @@ contract CounterTest is BaseTest {
 
         assertEq(hook.beforeSwapCount(poolId), 1);
         assertEq(hook.afterSwapCount(poolId), 1);
+        assertEq(hook.totalSwapCount(poolId),1);
     }
 
     function testLiquidityHooks() public {
