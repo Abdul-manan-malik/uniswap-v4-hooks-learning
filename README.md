@@ -1,9 +1,27 @@
 <<<<<<< HEAD
 =======
 >>>>>>> origin/main
-# Uniswap v4 Hook Template
+# Uniswap v4 Hooks Learning
 
-**A template for writing Uniswap v4 Hooks 🦄**
+My hands-on Web3 learning repository focused on Uniswap v4 Hooks.
+
+## What I have built so far
+
+- Set up Foundry
+- Compiled the Uniswap v4 hook template
+- Ran the full test suite
+- Modified `Counter.sol`
+- Added a custom `totalSwapCount` mapping
+- Added tests verifying the new counter
+- Learned how `beforeSwap` and `afterSwap` callbacks work
+
+## Current Goal
+
+Build increasingly useful Uniswap v4 Hooks while learning Solidity, Ethereum, DeFi, testing, and smart-contract development by doing.
+
+## Status
+
+Learning project — not production ready.
 
 ### Get Started
 
