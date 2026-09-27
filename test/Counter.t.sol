@@ -116,6 +116,21 @@ contract CounterTest is BaseTest {
         assertEq(hook.totalSwapCount(poolId),1);
     }
 
+    function testSwapAboveLimitReverts()public{
+        uint256 amountIn=2e18;
+        vm.expectRevert();
+
+        swapRouter.swapExactTokensForTokens({
+            amountIn:amountIn,
+            amountOutMin:0,
+            zeroForOne:true,
+            poolKey:poolKey,
+            hookData: Constants.ZERO_BYTES,
+            receiver:address(this),
+            deadline:block.timestamp+1
+        });
+    }
+
     function testLiquidityHooks() public {
         // positions were created in setup()
         assertEq(hook.beforeAddLiquidityCount(poolId), 1);

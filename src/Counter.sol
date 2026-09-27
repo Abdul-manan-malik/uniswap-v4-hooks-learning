@@ -48,12 +48,18 @@ contract Counter is BaseHook {
     // -----------------------------------------------
     // NOTE: see IHooks.sol for function documentation
     // -----------------------------------------------
+// function _beforeSwap(address, PoolKey calldata key, SwapParams calldata, bytes calldata)
+// function _beforeSwap(address, PoolKey calldata key, SwapParams calldata params, bytes calldata)
 
-    function _beforeSwap(address, PoolKey calldata key, SwapParams calldata, bytes calldata)
+    uint256 public maxSwapAmount= 1e18;
+    function _beforeSwap(address, PoolKey calldata key, SwapParams calldata params, bytes calldata)
         internal
         override
         returns (bytes4, BeforeSwapDelta, uint24)
     {
+        if(params.amountSpecified < -int256(maxSwapAmount)){
+            revert("Swap Amount too large");
+        }
         beforeSwapCount[key.toId()]++;
         return (BaseHook.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, 0);
     }
