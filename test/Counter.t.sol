@@ -18,10 +18,10 @@ import {Constants} from "@uniswap/v4-core/test/utils/Constants.sol";
 
 import {EasyPosm} from "./utils/libraries/EasyPosm.sol";
 
-import {Counter} from "../src/Counter.sol";
+import {SwapGuardHook} from "../src/SwapGuardHook.sol";
 import {BaseTest} from "./utils/BaseTest.sol";
 
-contract CounterTest is BaseTest {
+contract SwapGuardHookTest is BaseTest {
     using EasyPosm for IPositionManager;
     using PoolIdLibrary for PoolKey;
     using CurrencyLibrary for Currency;
@@ -32,7 +32,7 @@ contract CounterTest is BaseTest {
 
     PoolKey poolKey;
 
-    Counter hook;
+    SwapGuardHook hook;
     PoolId poolId;
 
     uint256 tokenId;
@@ -53,8 +53,8 @@ contract CounterTest is BaseTest {
             ) ^ (0x4444 << 144) // Namespace the hook to avoid collisions
         );
         bytes memory constructorArgs = abi.encode(poolManager); // Add all the necessary constructor arguments from the hook
-        deployCodeTo("Counter.sol:Counter", constructorArgs, flags);
-        hook = Counter(flags);
+        deployCodeTo("SwapGuardHook.sol:SwapGuardHook", constructorArgs, flags);
+        hook = SwapGuardHook(flags);
 
         // Create the pool
         poolKey = PoolKey(currency0, currency1, 3000, 60, IHooks(hook));
@@ -87,7 +87,7 @@ contract CounterTest is BaseTest {
         );
     }
 
-    function testCounterHooks() public {
+    function testSwapGuardHookHooks() public {
         // positions were created in setup()
         assertEq(hook.beforeAddLiquidityCount(poolId), 1);
         assertEq(hook.beforeRemoveLiquidityCount(poolId), 0);
@@ -117,7 +117,9 @@ contract CounterTest is BaseTest {
     }
 
     function testSwapAboveLimitReverts()public{
-        uint256 amountIn=2e18;
+        hook.setMaxSwapAmount(poolId,1e18);
+        uint256 amountIn = 2e18;
+
         vm.expectRevert();
 
         swapRouter.swapExactTokensForTokens({
@@ -131,17 +133,38 @@ contract CounterTest is BaseTest {
         });
     }
 
+
+    function testSwapAtLimitSucceeds() public {
+        hook.setMaxSwapAmount(poolId,1e18);
+        uint256 amountIn = 1e18;
+        swapRouter.swapExactTokensForTokens({
+            amountIn: amountIn,
+            amountOutMin: 0,
+            zeroForOne:true,
+            poolKey:poolKey,
+            hookData:Constants.ZERO_BYTES,
+            receiver:address(this),
+            deadline:block.timestamp+1
+        });
+    }
+
     function testOwnerCanChangeSwapLimit() public {
-        assertEq(hook.maxSwapAmount(),1e18);
-        hook.setMaxSwapAmount(5e18);
-        assertEq(hook.maxSwapAmount(),5e18);
+        assertEq(hook.maxSwapAmount(poolId),0);
+        hook.setMaxSwapAmount(poolId,5e18);
+        assertEq(hook.maxSwapAmount(poolId),5e18);
     }
 
     function testNonOwnerCannotChangeSwapLimit() public{
         address attacker = address(0xBEEF);
         vm.prank(attacker);
-        vm.expectRevert("Only Owner");
-        hook.setMaxSwapAmount(5e18);
+        vm.expectRevert(SwapGuardHook.NotOwner.selector);
+        hook.setMaxSwapAmount(poolId,1e18);
+    }
+
+    function testChangingLimitEmitsEvent() public {
+        vm.expectEmit(false, false, false, true);
+        emit SwapGuardHook.MaxSwapAmountUpdated(0, 5e18);
+        hook.setMaxSwapAmount(poolId,5e18);
     }
 
 

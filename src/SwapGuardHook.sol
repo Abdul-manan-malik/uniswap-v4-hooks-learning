@@ -10,13 +10,19 @@ import {PoolId, PoolIdLibrary} from "@uniswap/v4-core/src/types/PoolId.sol";
 import {BalanceDelta} from "@uniswap/v4-core/src/types/BalanceDelta.sol";
 import {BeforeSwapDelta, BeforeSwapDeltaLibrary} from "@uniswap/v4-core/src/types/BeforeSwapDelta.sol";
 
-contract Counter is BaseHook {
+contract SwapGuardHook is BaseHook {
     using PoolIdLibrary for PoolKey;
 
     // NOTE: ---------------------------------------------------------
     // state variables should typically be unique to a pool
     // a single hook contract should be able to service multiple pools
     // ---------------------------------------------------------------
+
+
+    error NotOwner();
+    error SwapAmountExceedsLimit();
+    event MaxSwapAmountUpdated(uint256 oldAmount,uint256 newAmount);
+
 
     mapping(PoolId => uint256 count) public beforeSwapCount;
     mapping(PoolId => uint256 count) public afterSwapCount;
@@ -55,12 +61,18 @@ contract Counter is BaseHook {
 
 
 
-    uint256 public maxSwapAmount= 1e18;
+    mapping(PoolId => uint256) public maxSwapAmount;
+
+
     address public owner;
 
-    function setMaxSwapAmount(uint256 newMaxSwapAmount) public {
-        require(msg.sender == owner, "Only Owner");
-        maxSwapAmount=newMaxSwapAmount;
+    function setMaxSwapAmount(PoolId poolId, uint256 newMaxSwapAmount) public {
+        if(msg.sender != owner){
+            revert NotOwner();
+        }
+        uint256 oldAmount=maxSwapAmount[poolId];
+        maxSwapAmount[poolId]=newMaxSwapAmount;
+        emit MaxSwapAmountUpdated(oldAmount,newMaxSwapAmount);
     }
 
 
@@ -69,8 +81,10 @@ contract Counter is BaseHook {
         override
         returns (bytes4, BeforeSwapDelta, uint24)
     {
-        if(params.amountSpecified < -int256(maxSwapAmount)){
-            revert("Swap Amount too large");
+        uint256 limit = maxSwapAmount[key.toId()];
+         
+        if(limit>0 &&   params.amountSpecified < -int256(limit)){
+           revert SwapAmountExceedsLimit();
         }
         beforeSwapCount[key.toId()]++;
         return (BaseHook.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, 0);

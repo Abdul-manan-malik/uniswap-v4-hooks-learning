@@ -10,9 +10,9 @@ My hands-on Web3 learning repository focused on Uniswap v4 Hooks.
 - Set up Foundry
 - Compiled the Uniswap v4 hook template
 - Ran the full test suite
-- Modified `Counter.sol`
+- Modified `SwapGuardHook.sol`
 - Added a custom `totalSwapCount` mapping
-- Added tests verifying the new counter
+- Added tests verifying the new SwapGuardHook
 - Learned how `beforeSwap` and `afterSwap` callbacks work
 
 ## Current Goal
@@ -29,8 +29,8 @@ This template provides a starting point for writing Uniswap v4 Hooks, including 
 
 [![Use this Template](https://img.shields.io/badge/Use%20this%20Template-101010?style=for-the-badge&logo=github)](https://github.com/uniswapfoundation/v4-template/generate)
 
-1. The example hook [Counter.sol](src/Counter.sol) demonstrates the `beforeSwap()` and `afterSwap()` hooks
-2. The test template [Counter.t.sol](test/Counter.t.sol) preconfigures the v4 pool manager, test tokens, and test liquidity.
+1. The example hook [SwapGuardHook.sol](src/SwapGuardHook.sol) demonstrates the `beforeSwap()` and `afterSwap()` hooks
+2. The test template [SwapGuardHook.t.sol](test/SwapGuardHook.t.sol) preconfigures the v4 pool manager, test tokens, and test liquidity.
 
 <details>
 <summary>Updating to v4-template:latest</summary>
@@ -47,7 +47,7 @@ git merge template/main <BRANCH> --allow-unrelated-histories
 
 ### Requirements
 
-This template is designed to work with Foundry (stable). If you are using Foundry Nightly, you may encounter compatibility issues. You can update your Foundry installation to the latest stable version by running:
+This template is designed to work with Foundry (stable). If you are using Foundry Nightly, you may enSwapGuardHook compatibility issues. You can update your Foundry installation to the latest stable version by running:
 
 ```
 foundryup
