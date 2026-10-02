@@ -131,6 +131,21 @@ contract CounterTest is BaseTest {
         });
     }
 
+    function testOwnerCanChangeSwapLimit() public {
+        assertEq(hook.maxSwapAmount(),1e18);
+        hook.setMaxSwapAmount(5e18);
+        assertEq(hook.maxSwapAmount(),5e18);
+    }
+
+    function testNonOwnerCannotChangeSwapLimit() public{
+        address attacker = address(0xBEEF);
+        vm.prank(attacker);
+        vm.expectRevert("Only Owner");
+        hook.setMaxSwapAmount(5e18);
+    }
+
+
+
     function testLiquidityHooks() public {
         // positions were created in setup()
         assertEq(hook.beforeAddLiquidityCount(poolId), 1);

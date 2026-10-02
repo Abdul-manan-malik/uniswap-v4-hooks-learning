@@ -24,7 +24,9 @@ contract Counter is BaseHook {
     mapping(PoolId => uint256 count) public beforeAddLiquidityCount;
     mapping(PoolId => uint256 count) public beforeRemoveLiquidityCount;
 
-    constructor(IPoolManager _poolManager) BaseHook(_poolManager) {}
+    constructor(IPoolManager _poolManager) BaseHook(_poolManager) {
+        owner= msg.sender;
+    }
 
     function getHookPermissions() public pure override returns (Hooks.Permissions memory) {
         return Hooks.Permissions({
@@ -51,7 +53,17 @@ contract Counter is BaseHook {
 // function _beforeSwap(address, PoolKey calldata key, SwapParams calldata, bytes calldata)
 // function _beforeSwap(address, PoolKey calldata key, SwapParams calldata params, bytes calldata)
 
+
+
     uint256 public maxSwapAmount= 1e18;
+    address public owner;
+
+    function setMaxSwapAmount(uint256 newMaxSwapAmount) public {
+        require(msg.sender == owner, "Only Owner");
+        maxSwapAmount=newMaxSwapAmount;
+    }
+
+
     function _beforeSwap(address, PoolKey calldata key, SwapParams calldata params, bytes calldata)
         internal
         override
